@@ -30,9 +30,7 @@ class RowGenerator:
             left = row[i-1] if i > 0 else SAFE
             right = row[i+1] if i < last_index else SAFE
 
-            if left == TRAP and right == SAFE:
-                new_cell_list.append(TRAP)
-            elif right == TRAP and left == SAFE:
+            if left != right:
                 new_cell_list.append(TRAP)
             else:
                 new_cell_list.append(SAFE)
