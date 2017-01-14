@@ -1,4 +1,6 @@
-reated by https://www.gitignore.io/api/pycharm
+Created by https://www.gitignore.io/api/pycharm
+
+**/*.DS_Store
 
 ### PyCharm ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
