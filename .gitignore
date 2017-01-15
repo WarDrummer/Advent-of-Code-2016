@@ -1,5 +1,5 @@
 Created by https://www.gitignore.io/api/pycharm
-
+**/*.pyc
 **/*.DS_Store
 
 ### PyCharm ###
