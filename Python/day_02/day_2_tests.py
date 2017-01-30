@@ -1,6 +1,6 @@
 import unittest
 
-from Python.day_02.day_2 import KeyPad
+from day_02.day_2 import KeyPad
 
 
 class StandardKeyPadTests(unittest.TestCase):
