@@ -16,6 +16,19 @@ class MapGenerator:
         return num_of_safe_tiles
 
 
+class MapGeneratorRecursive:
+
+    def __init__(self, row_generator):
+        self.row_generator = row_generator
+
+    def get_number_of_safe_tiles(self, row, num_rows):
+        if num_rows == 1: # num_rows includes the starting row
+            return row.count('.')
+
+        next_row = self.row_generator.get_next_row(row)
+        return row.count('.') + self.get_number_of_safe_tiles(next_row, num_rows - 1)
+
+
 class RowGenerator:
 
     def __init__(self):
