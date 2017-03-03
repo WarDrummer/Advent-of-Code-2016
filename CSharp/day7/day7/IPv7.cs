@@ -44,7 +44,54 @@ namespace day7
             }
 
             return false;
+        }
 
+        public bool SupportsSsl()
+        {
+            var hyperNetTriplets = new HashSet<string>();
+
+            foreach (var h in _hyperNet)
+            {
+                foreach (var triplet in GetTriplets(h))
+                {
+                    hyperNetTriplets.Add(triplet);
+                }
+            }
+
+            foreach (var h in _nonHyperNet)
+            {
+                foreach (var triplet in GetInvertedTriplets(h))
+                {
+                    if (hyperNetTriplets.Contains(triplet))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static IEnumerable<string> GetTriplets(string s)
+        {
+            for (var i = 0; i <= s.Length - 3; i++)
+            {
+                if (s[i] != s[i + 1] && s[i] == s[i + 2])
+                {
+                    yield return new string(new[] {s[i], s[i + 1], s[i + 2]});
+                }
+            }
+        }
+
+        private static IEnumerable<string> GetInvertedTriplets(string s)
+        {
+            for (var i = 0; i <= s.Length - 3; i++)
+            {
+                if (s[i] != s[i + 1] && s[i] == s[i + 2])
+                {
+                    yield return new string(new[] { s[i+1], s[i], s[i + 1] });
+                }
+            }
         }
     }
 }

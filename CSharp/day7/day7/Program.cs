@@ -10,15 +10,20 @@ namespace day7
 
             var file = new StreamReader("input.txt");
             string line;
-            var count = 0;
+            var tlsCount = 0;
+            var sslCount = 0;
             while ((line = file.ReadLine()) != null)
             {
                 var ip = new IPv7(line);
+
                 if (ip.SupportsTls())
-                    count++;
+                    tlsCount++;
+
+                if (ip.SupportsSsl())
+                    sslCount++;
             }
              
-            Console.WriteLine(count);
+            Console.WriteLine($"TLS: {tlsCount} SSL: {sslCount}");
             Console.ReadKey();
         }
     }

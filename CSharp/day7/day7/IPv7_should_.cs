@@ -19,10 +19,20 @@ namespace day7
         [TestCase("aaaa[qwer]tyui[qwer]", false)]
         [TestCase("ioxxoj[asdfgh]zxcvbn", true)]
         [TestCase("[asdfgh]ioxxoj[asdfgh]zxcvbn", true)]
-        public void validate_address(string address, bool expectedResult)
+        public void correctly_determine_tls_support(string address, bool expectedResult)
         {
             var ip = new IPv7(address);  
             Assert.AreEqual(expectedResult, ip.SupportsTls()); 
+        }
+
+        [TestCase("aba[bab]xyz", true)]
+        [TestCase("xyx[xyx]xyx", false)]
+        [TestCase("aaa[kek]eke", true)]
+        [TestCase("zazbz[bzb]cdb", true)]
+        public void correctly_determine_ssl_support(string address, bool expectedResult)
+        {
+            var ip = new IPv7(address);
+            Assert.AreEqual(expectedResult, ip.SupportsSsl());
         }
     }
 }
