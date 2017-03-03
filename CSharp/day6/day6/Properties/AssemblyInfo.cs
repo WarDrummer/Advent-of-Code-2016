@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("da4.console")]
+[assembly: AssemblyTitle("day6")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("da4.console")]
+[assembly: AssemblyProduct("day6")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("3b74134d-4f6c-4136-aeb2-f8dfd3fb9c0b")]
+[assembly: Guid("9c4f0b18-5253-4abf-a6c8-77fcd916f42e")]
 
 // Version information for an assembly consists of the following four values:
 //
