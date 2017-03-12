@@ -64,26 +64,9 @@ namespace day11
             return true;
         }
 
-        private bool IsFloorValid(int floor)
+        private bool IsFloorValid(int floorIndex)
         {
-            for (var i = 0; i < _symbols.Count; i++)
-            {
-                var microchipExists = _floors[floor][i];
-                var matchingGeneratorExists = _floors[floor][i + _symbols.Count];
-                if (microchipExists && !matchingGeneratorExists && AreGeneratorsPresent(floor))
-                    return false;
-            }
-            return true;
-        }
-
-        private bool AreGeneratorsPresent(int floor)
-        {
-            for (var generatorIndex = _symbols.Count; generatorIndex < _symbols.Count*2; generatorIndex++)
-            {
-                if (_floors[floor][generatorIndex])
-                    return true;
-            }
-            return false;
+            return new FloorValidator(_floors[floorIndex]).IsFloorValid();
         }
 
         public IEnumerable<Building> GetPossibleNextStates()

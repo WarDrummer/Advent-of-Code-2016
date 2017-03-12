@@ -50,6 +50,7 @@
     <Compile Include="BreadthFirstSearch.cs" />
     <Compile Include="Building.cs" />
     <Compile Include="Building_should_.cs" />
+    <Compile Include="FloorValidator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
