@@ -7,82 +7,46 @@ namespace day11
     {
         static void Main(string[] args)
         {
-            var symbols = new[] {'H', 'L'};
+            /** /
+             * var symbols = new[] { 'S', 'P', 'C', 'R', 'T' };
 
-            var goalState = new Building(
-                new[]
-                {
-                    new Floor( // 1
-                        symbols,
-                        new [] {false, false},
-                        new [] {false, false}),
-                    new Floor( // 2
-                        symbols,
-                        new [] {false, false},
-                        new [] {false, false}),
-                    new Floor( // 3
-                        symbols,
-                        new [] {false, false},
-                        new [] {false, false}),
-                    new Floor( // 4
-                        symbols,
-                        new [] {true, true},
-                        new [] {true, true}),
-                },
-                3).ToString();
+            var startState = new Building(symbols);
 
-            var building = new Building(
-                new []
-                {
-                    new Floor( // 1
-                        symbols, 
-                        new [] {true, true}, 
-                        new [] {false, false}),
-                    new Floor( // 2
-                        symbols,
-                        new [] {false, false},
-                        new [] {true, false}),
-                    new Floor( // 3
-                        symbols,
-                        new [] {false, false},
-                        new [] {false, true}),
-                    new Floor( // 4
-                        symbols,
-                        new [] {false, false},
-                        new [] {false, false}),
-                },
-                0);
+            //The first floor contains a strontium generator, a strontium-compatible microchip, a plutonium generator, and a plutonium - compatible microchip
+            startState.AddGenerator(0, 'S');
+            startState.AddMicrochip(0, 'S');
+            startState.AddGenerator(0, 'P');
+            startState.AddMicrochip(0, 'P');
 
-            var i = 0;
-            building.MarkAsPreviouslyRead();
+            //The second floor contains a thulium generator, a ruthenium generator, a ruthenium-compatible microchip, a curium generator, and a curium - compatible microchip.
+            startState.AddGenerator(1, 'T');
+            startState.AddGenerator(1, 'R');
+            startState.AddMicrochip(1, 'R');
+            startState.AddGenerator(1, 'C');
+            startState.AddMicrochip(1, 'C');
 
-            var queue = new Queue<Building>();
-            queue.Enqueue(building);
+            //The third floor contains a thulium-compatible microchip.
+            startState.AddMicrochip(2, 'T');
+            //*/
 
-            while (queue.Count != 0)
-            {
-                var newQueue = new Queue<Building>();
-                while (queue.Count > 0)
-                {
-                    var currentBuilding = queue.Dequeue();
-                    Console.WriteLine(currentBuilding);
-                    if (currentBuilding.ToString() == goalState)
-                    {
-                        newQueue.Clear();
-                        break;
-                    }
 
-                    foreach (var newB in currentBuilding.GetValidNextStates())
-                    {
-                        newQueue.Enqueue(newB);
-                    }
-                }
-                Console.WriteLine($"========================   {i}   ========================");
-                i++;
-                queue = newQueue;
-            }
- 
-            Console.WriteLine(i);
+            /**/
+            var symbols = new[] { 'H', 'L' };
+
+            var startState = new Building(symbols);
+
+            startState.AddGenerator(2, 'L');
+            startState.AddGenerator(1, 'H');
+            startState.AddMicrochip(0, 'H');
+            startState.AddMicrochip(0, 'L');
+
+            var fewestMoves = BreadthFirstSearch.GetFewestMovesToGoal(
+                startState, 
+                Building.CreateGoalState(symbols).ToString());
+            //*/
+
+            // 49 is too high :-/
+            Console.WriteLine(fewestMoves);
             Console.ReadKey();
         }
     }
