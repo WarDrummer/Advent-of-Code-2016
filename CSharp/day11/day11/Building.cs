@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -8,245 +10,354 @@ namespace day11
     public class Building
     {
         private readonly IList<char> _symbols;
-        private readonly bool[][] _floors = new bool[4][];
-        private int _elevatorLocation;
+        private readonly int[] _generatorLocations;
+        private readonly int[] _microchipLocations;
+        public int ElevatorLocation { get; set;  }
         private const string Missing = ".  ";
 
         public static Building CreateGoalState(char[] symbols)
         {
-            var goalStateBuilding = new Building(symbols);
-            goalStateBuilding.SetElevatorFloor(3);
+            var goalStateBuilding = new Building(symbols) {ElevatorLocation = 3};
             foreach (var symbol in symbols)
             {
-                goalStateBuilding.AddGenerator(3, symbol);
-                goalStateBuilding.AddMicrochip(3, symbol);
+                goalStateBuilding.SetGeneratorLocation(3, symbol);
+                goalStateBuilding.SetMicrochipLocation(3, symbol);
             }
+            // Console.WriteLine(goalStateBuilding.ToString());
             return goalStateBuilding;
         }
 
-        public Building(IReadOnlyCollection<char> symbols)
+        public Building(IEnumerable<char> symbols)
         {
             _symbols = new List<char>(symbols);
-            for (var i = 0; i < 4; i++)
-            {
-                _floors[i] = new bool[symbols.Count*2];
-            }
+            _generatorLocations = new int[_symbols.Count];
+            _microchipLocations = new int[_symbols.Count];
         }
 
-        private Building(IEnumerable<char> symbols, bool[][] floors)
+        private Building(IEnumerable<char> symbols, int[] microchipLocations, int[] generatorLocations)
         {
             _symbols = new List<char>(symbols);
-            _floors = floors;
+            _microchipLocations = microchipLocations;
+            _generatorLocations = generatorLocations;
         }
 
-        public void AddMicrochip(int floor, char element)
+        public void SetMicrochipLocation(int floor, char element)
         {
-            _floors[floor][_symbols.IndexOf(element)] = true;
+            _microchipLocations[_symbols.IndexOf(element)] = floor;
         }
 
-        public void AddGenerator(int floor, char element)
+        public int GetMicrochipLocation(char element)
         {
-            _floors[floor][_symbols.IndexOf(element) + _symbols.Count] = true;
+            return _microchipLocations[_symbols.IndexOf(element)];
         }
 
-        public void SetElevatorFloor(int floorIndex)
+        public void SetGeneratorLocation(int floor, char element)
         {
-            _elevatorLocation = floorIndex;
+            _generatorLocations[_symbols.IndexOf(element)] = floor;
         }
 
+        public int GetGeneratorLocation(char element)
+        {
+            return _generatorLocations[_symbols.IndexOf(element)];
+        }
+
+        //private static readonly HashSet<string> Invalid = new HashSet<string>();
         public bool IsValid()
         {
+            //if (Invalid.Contains(ToString()))
+            //{
+            //    return false;
+            //}
             for (var floorIndex = 0; floorIndex < 4; floorIndex++)
             {
                 if (!IsFloorValid(floorIndex))
+                {
+                    //Invalid.Add(ToString());
+                    //Console.WriteLine("Invalid: " + ToString());
                     return false;
+                }
             }
+
+            //Console.WriteLine("Valid: " + ToString());
             return true;
         }
 
         private bool IsFloorValid(int floorIndex)
         {
-            return new FloorValidator(_floors[floorIndex]).IsFloorValid();
+            if (_microchipLocations.Contains(floorIndex))
+            {
+                for (var i = 0; i < _microchipLocations.Length; i++)
+                {
+                    // if microchip is on floor and doesn't have its corresponding generator
+                    if (_microchipLocations[i] == floorIndex && _generatorLocations[i] != floorIndex)
+                    {
+                        // if a non-corresponding generator is on the floor, we burned up a chip
+                        if (_generatorLocations.Any(gl => gl == floorIndex))
+                            return false;
+                    }
+                }
+            }
+
+            return true;
         }
+
+        public delegate Building MoveItems(IEnumerable<char> microchips, IEnumerable<char> generators);
 
         public IEnumerable<Building> GetPossibleNextStates()
         {
             var microchips = GetMicrochipsOnCurrentFloor();
             var generators = GetGeneratorsOnCurrentFloor();
+
+            if (ElevatorLocation > 0)
+            {
+                foreach (var building in CreateNewState(microchips, generators, MoveDown))
+                    yield return building;
+            }
+
+            if (ElevatorLocation < 3)
+            {
+                foreach (var building in CreateNewState(microchips, generators, MoveUp))
+                    yield return building;
+            }
+        }
+
+        private static IEnumerable<Building> CreateNewState(char[] microchips, char[] generators, MoveItems moveItems)
+        {
             var none = new char[0];
 
-            if (_elevatorLocation > 0) // can move down
+            for (var i = 0; i < microchips.Length; i++)
             {
-                foreach (var microchip in microchips)
+                var microchip = microchips[i];
+                var building = moveItems(new[] {microchip}, none);
+                if (building.IsValid())
+                    yield return building;
+
+                for (var j = i + 1; j < microchips.Length; j++)
                 {
-                    var building = MoveDown(new[] {microchip}, none);
+                    var otherMicrochip = microchips[j];
+                    if (microchip == otherMicrochip)
+                        continue;
+
+                    building = moveItems(new[] {microchip, otherMicrochip}, none);
                     if (building.IsValid())
-                    {
                         yield return building;
-                    }
-
-                    foreach (var microchip2 in microchips)
-                    {
-                        if (microchip != microchip2)
-                        {
-                            building = MoveDown(new[] {microchip, microchip2}, none);
-                            if (building.IsValid())
-                            {
-                                yield return building;
-                            }
-                        }
-                    }
-
-                    foreach (var generator in generators)
-                    {
-                        building = MoveDown(new[] { microchip }, new []{ generator });
-                        if (building.IsValid())
-                        {
-                            yield return building;
-                        }   
-                    }
                 }
 
                 foreach (var generator in generators)
                 {
-                    foreach (var generator2 in generators)
-                    {
-                        if (generator != generator2)
-                        {
-                            var building = MoveDown(none, new[] {generator, generator2});
-                            if (building.IsValid())
-                            {
-                                yield return building;
-                            }
-                        }
-                    }
+                    building = moveItems(new[] { microchip }, new []{ generator });
+                    if (building.IsValid())
+                        yield return building;
                 }
             }
 
-            if (_elevatorLocation < 3) // can move up
+            for (var i = 0; i < generators.Length; i++)
             {
-                foreach (var microchip in microchips)
+                var generator = generators[i];
+                var building = moveItems(none, new[] {generator});
+                if (building.IsValid())
+                    yield return building;
+
+                for (var j = i + 1; j < generators.Length; j++)
                 {
-                    var building = MoveUp(new[] { microchip }, none);
+                    var otherGenerator = generators[j];
+                    if (generator == otherGenerator)
+                        continue;
+
+                    building = moveItems(none, new[] {generator, otherGenerator});
                     if (building.IsValid())
-                    {
                         yield return building;
-                    }
-
-                    foreach (var microchip2 in microchips)
-                    {
-                        if (microchip != microchip2)
-                        {
-                            building = MoveUp(new[] { microchip, microchip2 }, none);
-                            if (building.IsValid())
-                            {
-                                yield return building;
-                            }
-                        }
-                    }
-
-                    foreach (var generator in generators)
-                    {
-                        building = MoveUp(new[] { microchip }, new[] { generator });
-                        if (building.IsValid())
-                        {
-                            yield return building;
-                        }    
-                    }
-                }
-
-                foreach (var generator in generators)
-                {
-                    foreach (var generator2 in generators)
-                    {
-                        if (generator != generator2)
-                        {
-                            var building = MoveUp(none, new[] { generator, generator2 });
-                            if (building.IsValid())
-                            {
-                                yield return building;
-                            }
-                        }
-                    }
                 }
             }
         }
 
-        private char[] GetMicrochipsOnCurrentFloor()
+        //public IEnumerable<Building> GetPossibleNextStates()
+        //{
+        //    var microchips = GetMicrochipsOnCurrentFloor();
+        //    var generators = GetGeneratorsOnCurrentFloor();
+        //    var none = new char[0];
+
+        //    if (ElevatorLocation > 0) // can move down
+        //    {
+        //        foreach (var microchip in microchips)
+        //        {
+        //            var building = MoveDown(new[] {microchip}, none);
+        //            if (building.IsValid())
+        //            {
+        //                yield return building;
+        //            }
+
+        //            foreach (var microchip2 in microchips)
+        //            {
+        //                if (microchip != microchip2)
+        //                {
+        //                    building = MoveDown(new[] {microchip, microchip2}, none);
+        //                    if (building.IsValid())
+        //                    {
+        //                        yield return building;
+        //                    }
+        //                }
+        //            }
+
+        //            foreach (var generator in generators)
+        //            {
+        //                building = MoveDown(new[] { microchip }, new []{ generator });
+        //                if (building.IsValid())
+        //                {
+        //                    yield return building;
+        //                }   
+        //            }
+        //        }
+
+        //        foreach (var generator in generators)
+        //        {
+        //            foreach (var generator2 in generators)
+        //            {
+        //                if (generator != generator2)
+        //                {
+        //                    var building = MoveDown(none, new[] {generator, generator2});
+        //                    if (building.IsValid())
+        //                    {
+        //                        yield return building;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    if (ElevatorLocation < 3) // can move up
+        //    {
+        //        foreach (var microchip in microchips)
+        //        {
+        //            var building = MoveUp(new[] { microchip }, none);
+        //            if (building.IsValid())
+        //            {
+        //                yield return building;
+        //            }
+
+        //            foreach (var microchip2 in microchips)
+        //            {
+        //                if (microchip != microchip2)
+        //                {
+        //                    building = MoveUp(new[] { microchip, microchip2 }, none);
+        //                    if (building.IsValid())
+        //                    {
+        //                        yield return building;
+        //                    }
+        //                }
+        //            }
+
+        //            foreach (var generator in generators)
+        //            {
+        //                building = MoveUp(new[] { microchip }, new[] { generator });
+        //                if (building.IsValid())
+        //                {
+        //                    yield return building;
+        //                }    
+        //            }
+        //        }
+
+        //        foreach (var generator in generators)
+        //        {
+        //            foreach (var generator2 in generators)
+        //            {
+        //                if (generator != generator2)
+        //                {
+        //                    var building = MoveUp(none, new[] { generator, generator2 });
+        //                    if (building.IsValid())
+        //                    {
+        //                        yield return building;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        public char[] GetMicrochipsOnCurrentFloor()
         {
             var microchips = new List<char>();
             for (var i = 0; i < _symbols.Count; i++)
             {
-                if (_floors[_elevatorLocation][i])
-                {
-                    microchips.Add(_symbols[i]);
-                }
+                if( _microchipLocations[i] == ElevatorLocation)
+                    microchips.Add(_symbols[i]); 
             }
             return microchips.ToArray();
         }
 
-        private char[] GetGeneratorsOnCurrentFloor()
+        public char[] GetGeneratorsOnCurrentFloor()
         {
             var generators = new List<char>();
             for (var i = 0; i < _symbols.Count; i++)
             {
-                if (_floors[_elevatorLocation][i + _symbols.Count])
-                {
+                if (_generatorLocations[i] == ElevatorLocation)
                     generators.Add(_symbols[i]);
-                }
             }
             return generators.ToArray();
         }
 
-        private Building MoveUp(char[] microchips, char[] generators)
+        
+
+        private Building MoveUp(IEnumerable<char> microchips, IEnumerable<char> generators)
         {
-            var floors = CloneFloors();
-            foreach (var microchip in microchips)
+            var newMicrochips = CloneMicrochipLocations();
+            foreach (var m in microchips)
             {
-                var index = _symbols.IndexOf(microchip);
-                floors[_elevatorLocation][index] = false;
-                floors[_elevatorLocation + 1][index] = true;
+                var i = _symbols.IndexOf(m);
+                Debug.Assert(newMicrochips[i] == ElevatorLocation);
+                newMicrochips[i]++;
             }
 
-            foreach (var generator in generators)
+            var newGenerators = CloneGeneratorLocations();
+            foreach (var g in generators)
             {
-                var index = _symbols.IndexOf(generator) + _symbols.Count;
-                floors[_elevatorLocation][index] = false;
-                floors[_elevatorLocation + 1][index] = true;
+                var i = _symbols.IndexOf(g);
+                Debug.Assert(newGenerators[i] == ElevatorLocation);
+                newGenerators[i]++;
             }
 
-            return new Building(_symbols, floors)
+            return new Building(_symbols, newMicrochips, newGenerators)
             {
-                _elevatorLocation = _elevatorLocation + 1
+                ElevatorLocation = ElevatorLocation + 1
             };
         }
 
-        private Building MoveDown(char[] microchips, char[] generators)
+        private Building MoveDown(IEnumerable<char> microchips, IEnumerable<char> generators)
         {
-            var floors = CloneFloors();
-            foreach (var microchip in microchips)
+            var newMicrochips = CloneMicrochipLocations();
+            foreach (var m in microchips)
             {
-                var index = _symbols.IndexOf(microchip);
-                floors[_elevatorLocation][index] = false;
-                floors[_elevatorLocation - 1][index] = true;
+                var i = _symbols.IndexOf(m);
+                Debug.Assert(newMicrochips[i] == ElevatorLocation);
+                newMicrochips[i]--;
             }
 
-            foreach (var generator in generators)
+            var newGenerators = CloneGeneratorLocations();
+            foreach (var g in generators)
             {
-                var index = _symbols.IndexOf(generator) + _symbols.Count;
-                floors[_elevatorLocation][index] = false;
-                floors[_elevatorLocation - 1][index] = true;
+                var i = _symbols.IndexOf(g);
+                Debug.Assert(newGenerators[i] == ElevatorLocation);
+                newGenerators[i]--;
             }
 
-            return new Building(_symbols, floors)
+            return new Building(_symbols, newMicrochips, newGenerators)
             {
-                _elevatorLocation = _elevatorLocation - 1
+                ElevatorLocation = ElevatorLocation - 1
             };
         }
 
-        private bool[][] CloneFloors()
+        private int[] CloneMicrochipLocations()
         {
-            return _floors.Select(a => a.ToArray()).ToArray();
+            var newMicrochips = new int[_microchipLocations.Length];
+            Array.Copy(_microchipLocations, newMicrochips, newMicrochips.Length);
+            return newMicrochips;
+        }
+
+        private int[] CloneGeneratorLocations()
+        {
+            var newGenerators = new int[_generatorLocations.Length];
+            Array.Copy(_generatorLocations, newGenerators, newGenerators.Length);
+            return newGenerators;
         }
 
         public override string ToString()
@@ -255,13 +366,12 @@ namespace day11
             for (var floorIndex = 3; floorIndex >= 0; floorIndex--)
             {
                 sb.Append($"F{floorIndex + 1} ");
-                sb.Append((_elevatorLocation == floorIndex) ? "E  " : Missing);
+                sb.Append(ElevatorLocation == floorIndex ? "E  " : Missing);
 
-                for (var microchipIndex = 0; microchipIndex < _symbols.Count; microchipIndex++)
+                for (var elementIndex = 0; elementIndex < _symbols.Count; elementIndex++)
                 {
-                    var generatorIndex = _symbols.Count + microchipIndex;
-                    sb.Append(_floors[floorIndex][microchipIndex] ? AsMicrochip(_symbols[microchipIndex]) : Missing);
-                    sb.Append(_floors[floorIndex][generatorIndex] ? AsGenerator(_symbols[microchipIndex]) : Missing);
+                    sb.Append(_microchipLocations[elementIndex] == floorIndex ? AsMicrochip(_symbols[elementIndex]) : Missing);
+                    sb.Append(_generatorLocations[elementIndex] == floorIndex ? AsGenerator(_symbols[elementIndex]) : Missing);
                 }
 
                 sb.AppendLine();
