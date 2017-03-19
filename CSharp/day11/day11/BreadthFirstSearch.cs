@@ -41,7 +41,7 @@ namespace day11
                 if (found)
                     break;
 
-                Console.WriteLine($"========================   {numberOfMoves}   ========================");
+                //Console.WriteLine($"========================   {numberOfMoves}   ========================");
                 numberOfMoves++;
                 queue = nextQueue;
             }
