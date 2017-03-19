@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Tools;
 
 namespace day14
@@ -10,16 +9,14 @@ namespace day14
 
         public int GetIndexOfHashProducing64ThKey(string seed)
         {
-            
-            var found = 0;
-            for (var i = 0; i < int.MaxValue; i++)
+            var numberOfKeysFounds = 0;
+            for (var iteration = 0; iteration < int.MaxValue; iteration++)
             {
                 var previous = '\0';
                 var previousCount = 1;
                 var firstTriplet = '\0';
-                // var md5 = new string(Md5Stringifier.GetHexCharacters($"{seed}{i}").ToArray());
-                // Console.WriteLine($"{i}: {md5}");
-                foreach (var current in Md5Stringifier.GetHexCharacters($"{seed}{i}"))
+
+                foreach (var current in Md5Stringifier.GetHexCharacters($"{seed}{iteration}"))
                 {
                     if (current == previous)
                     {
@@ -33,24 +30,22 @@ namespace day14
                             {
                                 _lastSeen[current] = new List<int>();
                             }
-                            _lastSeen[current].Add(i);
-                            //   Console.WriteLine($"First triple for i{i}={current}{current}{current}");
+                            _lastSeen[current].Add(iteration);
                         }
                         else if (previousCount == 5 && _lastSeen.ContainsKey(current))
                         {
-                            // count all hashes found in the last 1000 
-                            found += _lastSeen[current]
-                                .Count(previousTripletIndex => previousTripletIndex != i &&
-                                                               i - previousTripletIndex <= 1000);
-
-                            if (found >= 64)
+                            for (var x = 0; x < _lastSeen[current].Count; x++)
                             {
-                                return i;
-                            }
-
-                            // remove counted hashes
-                            //lastSeen[current].RemoveAll(previousTripletIndex => previousTripletIndex != i &&
-                            //                                                  i - previousTripletIndex <= 1000);   
+                                if (iteration != _lastSeen[current][x] &&
+                                    iteration - _lastSeen[current][x] <= 1000)
+                                {
+                                    numberOfKeysFounds++;
+                                    if (numberOfKeysFounds == 64)
+                                    {
+                                        return _lastSeen[current][x];
+                                    }
+                                }
+                            }  
                         }
                     }
                     else
