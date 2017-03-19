@@ -60,25 +60,16 @@ namespace day11
         {
             return _generatorLocations[_symbols.IndexOf(element)];
         }
-
-        //private static readonly HashSet<string> Invalid = new HashSet<string>();
+        
         public bool IsValid()
         {
-            //if (Invalid.Contains(ToString()))
-            //{
-            //    return false;
-            //}
             for (var floorIndex = 0; floorIndex < 4; floorIndex++)
             {
                 if (!IsFloorValid(floorIndex))
                 {
-                    //Invalid.Add(ToString());
-                    //Console.WriteLine("Invalid: " + ToString());
                     return false;
                 }
             }
-
-            //Console.WriteLine("Valid: " + ToString());
             return true;
         }
 
@@ -362,21 +353,23 @@ namespace day11
 
         public override string ToString()
         {
-            var sb = new StringBuilder();
-            for (var floorIndex = 3; floorIndex >= 0; floorIndex--)
-            {
-                sb.Append($"F{floorIndex + 1} ");
-                sb.Append(ElevatorLocation == floorIndex ? "E  " : Missing);
+            return ElevatorLocation + string.Join(",", _microchipLocations) +
+                   string.Join(",", _generatorLocations);
+            //var sb = new StringBuilder();
+            //for (var floorIndex = 3; floorIndex >= 0; floorIndex--)
+            //{
+            //    sb.Append($"F{floorIndex + 1} ");
+            //    sb.Append(ElevatorLocation == floorIndex ? "E  " : Missing);
 
-                for (var elementIndex = 0; elementIndex < _symbols.Count; elementIndex++)
-                {
-                    sb.Append(_microchipLocations[elementIndex] == floorIndex ? AsMicrochip(_symbols[elementIndex]) : Missing);
-                    sb.Append(_generatorLocations[elementIndex] == floorIndex ? AsGenerator(_symbols[elementIndex]) : Missing);
-                }
+            //    for (var elementIndex = 0; elementIndex < _symbols.Count; elementIndex++)
+            //    {
+            //        sb.Append(_microchipLocations[elementIndex] == floorIndex ? AsMicrochip(_symbols[elementIndex]) : Missing);
+            //        sb.Append(_generatorLocations[elementIndex] == floorIndex ? AsGenerator(_symbols[elementIndex]) : Missing);
+            //    }
 
-                sb.AppendLine();
-            }
-            return sb.ToString();
+            //    sb.AppendLine();
+            //}
+            //return sb.ToString();
         }
 
         private static string AsMicrochip(char element)
