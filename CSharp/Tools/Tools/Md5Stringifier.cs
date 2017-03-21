@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -18,6 +19,11 @@ namespace Tools
                     yield return chars[1];
                 }
             }
+        }
+
+        public static string GetMd5String(string seed)
+        {
+            return new string(Md5Stringifier.GetHexCharacters(seed).ToArray());
         }
     }
 }

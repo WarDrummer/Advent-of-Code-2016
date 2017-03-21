@@ -5,57 +5,111 @@ namespace day14
 {
     class KeyGenerator
     {
-        private readonly Dictionary<char, List<int>> _lastSeen = new Dictionary<char, List<int>>();
+        private readonly Dictionary<char, List<int>> _quintIndexes = new Dictionary<char, List<int>>();
 
-        public int GetIndexOfHashProducing64ThKey(string seed)
+        public static char GetFirstTripletMatch(string md5)
         {
-            var numberOfKeysFounds = 0;
+            var previous = '\0';
+            var previousCount = 1;
+
+            foreach (var c in md5)
+            {
+                if (previous == c)
+                {
+                    previousCount++;
+                    if (previousCount == 3)
+                        return c;
+                }
+                else
+                {
+                    previous = c;
+                    previousCount = 1;
+                }
+            }
+
+            return '\0';
+        }
+
+        public static IEnumerable<char> GetAllQuintMatches(string md5)
+        {
+            var previous = '\0';
+            var previousCount = 1;
+
+            foreach (var c in md5)
+            {
+                if (previous == c)
+                {
+                    previousCount++;
+                    if (previousCount == 5)
+                        yield return c;
+                }
+                else
+                {
+                    previous = c;
+                    previousCount = 1;
+                }
+                    
+            }
+        }
+        
+        public int IndexOf64thKey(string seed)
+        {
+            var count = 0;
             for (var iteration = 0; iteration < int.MaxValue; iteration++)
             {
-                var previous = '\0';
-                var previousCount = 1;
-                var firstTriplet = '\0';
+                var md5 = Get2016Hash($"{seed}{iteration}");
 
-                foreach (var current in Md5Stringifier.GetHexCharacters($"{seed}{iteration}"))
+                foreach (var quint in GetAllQuintMatches(md5))
                 {
-                    if (current == previous)
+                    if (!_quintIndexes.ContainsKey(quint))
                     {
-                        previousCount++;
-
-                        // only consider first triplet for each hash
-                        if (previousCount == 3 && firstTriplet == '\0')
-                        {
-                            firstTriplet = current;
-                            if (!_lastSeen.ContainsKey(current))
-                            {
-                                _lastSeen[current] = new List<int>();
-                            }
-                            _lastSeen[current].Add(iteration);
-                        }
-                        else if (previousCount == 5 && _lastSeen.ContainsKey(current))
-                        {
-                            for (var x = 0; x < _lastSeen[current].Count; x++)
-                            {
-                                if (iteration != _lastSeen[current][x] &&
-                                    iteration - _lastSeen[current][x] <= 1000)
-                                {
-                                    numberOfKeysFounds++;
-                                    if (numberOfKeysFounds == 64)
-                                    {
-                                        return _lastSeen[current][x];
-                                    }
-                                }
-                            }  
-                        }
+                        _quintIndexes.Add(quint, new List<int>());
                     }
-                    else
+                    _quintIndexes[quint].Add(iteration);
+                }
+
+                if (iteration >= 1000)
+                {
+                    var previousIndex = iteration - 1000;
+                    var previousMd5 = Get2016Hash($"{seed}{previousIndex}");
+                    if (IsKey(previousMd5, previousIndex))
                     {
-                        previous = current;
-                        previousCount = 1;
+                        count++;
+                        if (count == 64)
+                            return previousIndex;
                     }
                 }
             }
+
             return -1;
+        }
+
+        private Dictionary<string, string> _foundHashes = new Dictionary<string, string>();
+        public string Get2016Hash(string seed)
+        {
+            if (_foundHashes.ContainsKey(seed))
+                return _foundHashes[seed];
+
+            var md5 = Md5Stringifier.GetMd5String(seed);
+            for (int i = 0; i < 2016; i++)
+            {
+                md5 = Md5Stringifier.GetMd5String(md5);
+            }
+
+            _foundHashes.Add(seed, md5);
+            return md5;
+        }
+
+        public bool IsKey(string md5, int tripletIndex)
+        {
+            var triplet = GetFirstTripletMatch(md5);
+            if (triplet == '\0' || !_quintIndexes.ContainsKey(triplet))
+            {
+                return false;
+            }
+
+            return _quintIndexes[triplet].Exists(quintIndex =>
+                (quintIndex - tripletIndex < 1000) && (quintIndex > tripletIndex));
         }
     }
 }
