@@ -1,4 +1,5 @@
 ﻿using System;
+using Tools;
 
 namespace day11
 {
@@ -16,6 +17,7 @@ namespace day11
             startState.SetMicrochipLocation(0, 'S');
             startState.SetGeneratorLocation(0, 'P');
             startState.SetMicrochipLocation(0, 'P');
+
             // first floor part 2
             startState.SetGeneratorLocation(0, 'E');
             startState.SetMicrochipLocation(0, 'E');
@@ -45,12 +47,9 @@ namespace day11
             startState.SetMicrochipLocation(0, 'L');
             //*/
 
-            var fewestMoves = BreadthFirstSearch.GetFewestMovesToGoal(
-                startState, 
-                Building.CreateGoalState(symbols).ToString());
+            var bfs = new BreadthFirstSearch(Building.CreateGoalState(symbols));
+            var fewestMoves = bfs.GetMinimumNumberOfMoves(startState);
            
-
-            // 48 is too high :-/
             Console.WriteLine(fewestMoves);
             Console.ReadKey();
         }

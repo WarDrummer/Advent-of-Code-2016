@@ -47,7 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BreadthFirstSearch.cs" />
     <Compile Include="Building.cs" />
     <Compile Include="Building_should_.cs" />
     <Compile Include="Program.cs" />
@@ -56,6 +55,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Tools\Tools\Tools.csproj">
+      <Project>{9D1EAE6F-6D22-4E5B-94BE-1663D997BC86}</Project>
+      <Name>Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

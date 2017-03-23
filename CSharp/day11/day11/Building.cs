@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Tools;
 
 namespace day11
 {
 
-    public class Building
+    public class Building : INode
     {
         private readonly IList<char> _symbols;
         private readonly int[] _generatorLocations;
         private readonly int[] _microchipLocations;
-        public int ElevatorLocation { get; set;  }
+        public int ElevatorLocation { get; set; }
         private const string Missing = ".  ";
 
         public static Building CreateGoalState(char[] symbols)
@@ -23,7 +24,6 @@ namespace day11
                 goalStateBuilding.SetGeneratorLocation(3, symbol);
                 goalStateBuilding.SetMicrochipLocation(3, symbol);
             }
-            // Console.WriteLine(goalStateBuilding.ToString());
             return goalStateBuilding;
         }
 
@@ -60,7 +60,7 @@ namespace day11
         {
             return _generatorLocations[_symbols.IndexOf(element)];
         }
-        
+
         public bool IsValid()
         {
             for (var floorIndex = 0; floorIndex < 4; floorIndex++)
@@ -136,7 +136,7 @@ namespace day11
 
                 foreach (var generator in generators)
                 {
-                    building = moveItems(new[] { microchip }, new []{ generator });
+                    building = moveItems(new[] {microchip}, new[] {generator});
                     if (building.IsValid())
                         yield return building;
                 }
@@ -270,8 +270,8 @@ namespace day11
             var microchips = new List<char>();
             for (var i = 0; i < _symbols.Count; i++)
             {
-                if( _microchipLocations[i] == ElevatorLocation)
-                    microchips.Add(_symbols[i]); 
+                if (_microchipLocations[i] == ElevatorLocation)
+                    microchips.Add(_symbols[i]);
             }
             return microchips.ToArray();
         }
@@ -287,7 +287,7 @@ namespace day11
             return generators.ToArray();
         }
 
-        
+
 
         private Building MoveUp(IEnumerable<char> microchips, IEnumerable<char> generators)
         {
@@ -353,23 +353,21 @@ namespace day11
 
         public override string ToString()
         {
-            return ElevatorLocation + string.Join(",", _microchipLocations) +
-                   string.Join(",", _generatorLocations);
-            //var sb = new StringBuilder();
-            //for (var floorIndex = 3; floorIndex >= 0; floorIndex--)
-            //{
-            //    sb.Append($"F{floorIndex + 1} ");
-            //    sb.Append(ElevatorLocation == floorIndex ? "E  " : Missing);
+            var sb = new StringBuilder();
+            for (var floorIndex = 3; floorIndex >= 0; floorIndex--)
+            {
+                sb.Append($"F{floorIndex + 1} ");
+                sb.Append(ElevatorLocation == floorIndex ? "E  " : Missing);
 
-            //    for (var elementIndex = 0; elementIndex < _symbols.Count; elementIndex++)
-            //    {
-            //        sb.Append(_microchipLocations[elementIndex] == floorIndex ? AsMicrochip(_symbols[elementIndex]) : Missing);
-            //        sb.Append(_generatorLocations[elementIndex] == floorIndex ? AsGenerator(_symbols[elementIndex]) : Missing);
-            //    }
+                for (var elementIndex = 0; elementIndex < _symbols.Count; elementIndex++)
+                {
+                    sb.Append(_microchipLocations[elementIndex] == floorIndex ? AsMicrochip(_symbols[elementIndex]) : Missing);
+                    sb.Append(_generatorLocations[elementIndex] == floorIndex ? AsGenerator(_symbols[elementIndex]) : Missing);
+                }
 
-            //    sb.AppendLine();
-            //}
-            //return sb.ToString();
+                sb.AppendLine();
+            }
+            return sb.ToString();
         }
 
         private static string AsMicrochip(char element)
@@ -381,6 +379,31 @@ namespace day11
         {
             return $"{element}G ";
         }
-    }
 
+        public IEnumerable<INode> GetNextNodes()
+        {
+            return GetPossibleNextStates();
+        }
+
+        public int CompareTo(INode other)
+        {
+            return UniqueIdentifier != other.UniqueIdentifier ? -1 : 0;
+        }
+
+        public string UniqueIdentifier
+        {
+            get
+            {
+                long hash = 0;
+                var generatorOffset = _microchipLocations.Length * 2;
+                for (int i = 0, j = 0, k = generatorOffset; i < _microchipLocations.Length; i++, j+=2, k+=2)
+                {
+                    hash += _microchipLocations[i] << j;
+                    hash += _generatorLocations[i] << k;
+                }
+                hash += ElevatorLocation << (4 * _microchipLocations.Length);
+                return hash.ToString();
+            }
+        }
+    }
 }
