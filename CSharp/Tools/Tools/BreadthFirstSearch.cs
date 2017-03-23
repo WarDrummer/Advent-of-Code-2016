@@ -3,31 +3,31 @@ using System.Collections.Generic;
 
 namespace Tools
 {
-    public interface INode : IComparable<INode>
+    public interface INode<T> : IComparable<INode<T>>
     {
-        IEnumerable<INode> GetNextNodes();
-        string UniqueIdentifier { get; }
+        IEnumerable<INode<T>> GetNextNodes();
+        T UniqueIdentifier { get; }
     }
 
-    public class BreadthFirstSearch
+    public class BreadthFirstSearch<T>
     {
-        private readonly INode _goal;
+        private readonly INode<T> _goal;
 
-        public BreadthFirstSearch(INode goal)
+        public BreadthFirstSearch(INode<T> goal)
         {
             _goal = goal;
         }
 
-        public int GetMinimumNumberOfMoves(INode start)
+        public int GetMinimumNumberOfMoves(INode<T> start)
         {
             var matchFound = false;
             var numberOfMoves = 0;
 
-            var currentNodes = new Queue<INode>();
+            var currentNodes = new Queue<INode<T>>();
             currentNodes.Enqueue(start);
 
-            var nextNodes = new Queue<INode>();
-            var visited = new HashSet<string>();
+            var nextNodes = new Queue<INode<T>>();
+            var visited = new HashSet<T>();
 
             while (currentNodes.Count > 0)
             {
@@ -51,7 +51,7 @@ namespace Tools
                 if (currentNodes.Count == 0)
                 {
                     currentNodes = nextNodes;
-                    nextNodes = new Queue<INode>();
+                    nextNodes = new Queue<INode<T>>();
                     numberOfMoves += 1;
                 }
             }

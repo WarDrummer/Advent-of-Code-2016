@@ -7,8 +7,8 @@ using Tools;
 
 namespace day11
 {
-
-    public class Building : INode
+    using Node = INode<long>;
+    public class Building : Node
     {
         private readonly IList<char> _symbols;
         private readonly int[] _generatorLocations;
@@ -380,21 +380,21 @@ namespace day11
             return $"{element}G ";
         }
 
-        public IEnumerable<INode> GetNextNodes()
+        public IEnumerable<Node> GetNextNodes()
         {
             return GetPossibleNextStates();
         }
 
-        public int CompareTo(INode other)
+        public int CompareTo(Node other)
         {
-            return UniqueIdentifier != other.UniqueIdentifier ? -1 : 0;
+            return (int)(UniqueIdentifier - other.UniqueIdentifier);
         }
 
-        public string UniqueIdentifier
+        public long UniqueIdentifier
         {
             get
             {
-                long hash = 0;
+                var hash = 0;
                 var generatorOffset = _microchipLocations.Length * 2;
                 for (int i = 0, j = 0, k = generatorOffset; i < _microchipLocations.Length; i++, j+=2, k+=2)
                 {
@@ -402,7 +402,7 @@ namespace day11
                     hash += _generatorLocations[i] << k;
                 }
                 hash += ElevatorLocation << (4 * _microchipLocations.Length);
-                return hash.ToString();
+                return hash;
             }
         }
     }
