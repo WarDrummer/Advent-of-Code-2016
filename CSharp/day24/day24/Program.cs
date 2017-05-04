@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tools;
 
 namespace day24
@@ -11,10 +8,11 @@ namespace day24
     {
         static void Main(string[] args)
         {
-            var lines = LineByLine.GetLines("input.txt").ToArray();
+            var lines = LineByLine.GetLines("input-part1.txt").ToArray();
             var map = new Map(lines);
             map.Initialize();
-            Console.WriteLine(map.ToString());
+            Console.WriteLine(map.GetMinimumMovesToVisitAllNodes());
+            Console.WriteLine(map.GetMinimumMovesToVisitAllNodesAndReturn());
             Console.ReadKey();
         }    
     }

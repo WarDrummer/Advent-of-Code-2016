@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace day24
 {
+    using VisitedNodeToCost = Dictionary<int, int>;
+    using NodeToLocation = Dictionary<int, Location>;
+
     public class Map
     {
         private readonly string[] _lines;
         private char[][] _charMap = {};
-        private Dictionary<int, Location> _pointsOfInterest = new Dictionary<int, Location>();
-        private Dictionary<int, Dictionary<int, int>> _costGraph = new Dictionary<int, Dictionary<int, int>>();
+        private NodeToLocation _pointsOfInterest = new NodeToLocation();
+        private Dictionary<int, VisitedNodeToCost> _costGraph = new Dictionary<int, VisitedNodeToCost>();
         
         public Map(string[] lines)
         {
@@ -24,9 +28,50 @@ namespace day24
             BuildCostGraph();
         }
 
+        public int GetMinimumMovesToVisitAllNodes()
+        {
+            var nonStartingPoints = _pointsOfInterest.Keys.Where(k => k != '0').ToList();
+
+            var minimumMoves = int.MaxValue;
+            foreach (var permutation in Permutation.GetPermutations(nonStartingPoints))
+            {
+                var cost = 0;
+                permutation.Insert(0, '0');
+               
+                for (var i = 0; i < permutation.Count - 1; i++)
+                {
+                    cost += _costGraph[permutation[i]][permutation[i + 1]];
+                }
+                if (cost < minimumMoves)
+                    minimumMoves = cost;
+            }
+            return minimumMoves;
+        }
+
+        public int GetMinimumMovesToVisitAllNodesAndReturn()
+        {
+            var nonStartingPoints = _pointsOfInterest.Keys.Where(k => k != '0').ToList();
+
+            var minimumMoves = int.MaxValue;
+            foreach (var permutation in Permutation.GetPermutations(nonStartingPoints))
+            {
+                var cost = 0;
+                permutation.Insert(0, '0');
+                permutation.Add('0');
+
+                for (var i = 0; i < permutation.Count - 1; i++)
+                {
+                    cost += _costGraph[permutation[i]][permutation[i + 1]];
+                }
+                if (cost < minimumMoves)
+                    minimumMoves = cost;
+            }
+            return minimumMoves;
+        }
+
         private void BuildCostGraph()
         {
-            _costGraph = new Dictionary<int, Dictionary<int, int>>();
+            _costGraph = new Dictionary<int, VisitedNodeToCost>();
             var locations = _pointsOfInterest.Keys.ToArray();
             for (var i = 0; i < locations.Length; i++)
             {
@@ -39,12 +84,12 @@ namespace day24
                     var cost = FindDistanceFrom(locationA, locationB);
 
                     if (!_costGraph.ContainsKey(keyLocationA))
-                        _costGraph[keyLocationA] = new Dictionary<int, int>();
+                        _costGraph[keyLocationA] = new VisitedNodeToCost();
 
                     _costGraph[keyLocationA].Add(keyLocationB, cost);
 
                     if (!_costGraph.ContainsKey(keyLocationB))
-                        _costGraph[keyLocationB] = new Dictionary<int, int>();
+                        _costGraph[keyLocationB] = new VisitedNodeToCost();
 
                     _costGraph[keyLocationB].Add(keyLocationA, cost);
                 }
@@ -53,7 +98,6 @@ namespace day24
 
         private int FindDistanceFrom(Location a, Location b)
         {
-            //Console.WriteLine($"Finding distance from {a.X}, {a.Y} => {b.X}, {b.Y}");
             var distance = 0;
             var seen = new HashSet<long> { a.UniqueIdentifier };
 
@@ -65,7 +109,6 @@ namespace day24
             while (q.Count > 0)
             {
                 var current = q.Dequeue();
-                //Console.WriteLine($"Trying {current.X}, {current.Y}");
                 if (current.IsEqualTo(b))
                     return distance;
 
@@ -80,7 +123,6 @@ namespace day24
 
                 if (q.Count == 0)
                 {
-                    //Console.WriteLine("Increasing breadth");
                     q = nextQ;
                     nextQ = new Queue<Location>();
                     distance += 1;
@@ -125,7 +167,7 @@ namespace day24
 
         private void FindPointsOfInterest()
         {
-            _pointsOfInterest = new Dictionary<int, Location>();
+            _pointsOfInterest = new NodeToLocation();
             for (var y = 0; y < _charMap.Length; y++)
             {
                 var row = _charMap[y];
