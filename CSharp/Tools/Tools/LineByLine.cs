@@ -7,7 +7,7 @@ namespace Tools
     {
         public static IEnumerable<string> GetLines(string filename)
         {
-            using (var file = new StreamReader("input.txt"))
+            using (var file = new StreamReader(filename))
             {
                 string line;
                 while ((line = file.ReadLine()) != null)
