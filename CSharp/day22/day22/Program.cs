@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Tools;
 
 namespace day22
@@ -23,6 +24,13 @@ namespace day22
             }
 
             Part1(nodes);
+
+            Part2(nodes); // print for manual interpretation
+            // 64 steps to move empty space around large capacity nodes and to top-right cell
+            // 5 steps to use empty cell to move target data
+            // 37 step to goal 
+            // 64 + (5 * 37) = 249
+
             Console.ReadKey();
         }
 
@@ -48,6 +56,24 @@ namespace day22
             }
 
             Console.WriteLine(viablePairCount);
+        }
+
+        private static void Part2(GridNode[][] nodes)
+        {
+            var xLength = nodes.Length;
+            var yLength = nodes[0].Length;
+            var sb = new StringBuilder();
+            for (var y = 0; y < yLength; y++)
+            {
+                for (var x = 0; x < xLength; x++)
+                {
+                    var node = nodes[x][y];
+                    sb.Append($"{node.Used:D3}/{(node.Available + node.Used):D3} ");
+                }
+                sb.AppendLine();
+            }
+
+            Console.WriteLine(sb);
         }
     }
 }
