@@ -1,5 +1,4 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace day11
 {
@@ -9,9 +8,9 @@ namespace day11
         [Test]
         public void convert_to_readable_string()
         {
-            var building = new Building(new [] {'L', 'H'});
+            var building = new Building(new [] {'L', 'H'}, 0);
             Assert.AreEqual(
-                "F4 .  .  .  .  .  \r\nF3 .  .  .  .  .  \r\nF2 .  .  .  .  .  \r\nF1 E  .  .  .  .  \r\n", 
+                "F4 .  .  .  .  .  \r\nF3 .  .  .  .  .  \r\nF2 .  .  .  .  .  \r\nF1 E  LM LG HM HG \r\n", 
                 building.ToString());
         }
 
@@ -40,39 +39,51 @@ namespace day11
         [Test]
         public void get_microchips_for_floor()
         {
-            var building = new Building(new[] {'L', 'H', 'M', 'Q' });
-            building.SetMicrochipLocation(0, 'L');
-            building.SetMicrochipLocation(2, 'H');
-            building.SetMicrochipLocation(2, 'M');
-            building.SetMicrochipLocation(3, 'Q');
+            var buildingAt0 = new Building(new[] {'L', 'H', 'M', 'Q' }, 0);
+            buildingAt0.SetMicrochipLocation(0, 'L');
+            buildingAt0.SetMicrochipLocation(2, 'H');
+            buildingAt0.SetMicrochipLocation(2, 'M');
+            buildingAt0.SetMicrochipLocation(3, 'Q');
+            Assert.AreEqual(new [] {'L'}, buildingAt0.GetMicrochipsOnCurrentFloor());
 
-            building.ElevatorLocation = 0;
-            Assert.AreEqual(new [] {'L'}, building.GetMicrochipsOnCurrentFloor());
+            var buildingAt2 = new Building(new[] { 'L', 'H', 'M', 'Q' }, 2);
+            buildingAt2.SetMicrochipLocation(0, 'L');
+            buildingAt2.SetMicrochipLocation(2, 'H');
+            buildingAt2.SetMicrochipLocation(2, 'M');
+            buildingAt2.SetMicrochipLocation(3, 'Q');
+            Assert.AreEqual(new[] { 'H', 'M' }, buildingAt2.GetMicrochipsOnCurrentFloor());
 
-            building.ElevatorLocation = 2;
-            Assert.AreEqual(new[] { 'H', 'M' }, building.GetMicrochipsOnCurrentFloor());
-
-            building.ElevatorLocation = 3;
-            Assert.AreEqual(new[] { 'Q' }, building.GetMicrochipsOnCurrentFloor());
+            var buildingAt3 = new Building(new[] { 'L', 'H', 'M', 'Q' }, 3);
+            buildingAt3.SetMicrochipLocation(0, 'L');
+            buildingAt3.SetMicrochipLocation(2, 'H');
+            buildingAt3.SetMicrochipLocation(2, 'M');
+            buildingAt3.SetMicrochipLocation(3, 'Q');
+            Assert.AreEqual(new[] { 'Q' }, buildingAt3.GetMicrochipsOnCurrentFloor());
         }
 
         [Test]
         public void get_generators_for_floor()
         {
-            var building = new Building(new[] { 'L', 'H', 'M', 'Q' });
-            building.SetGeneratorLocation(0, 'L');
-            building.SetGeneratorLocation(2, 'H');
-            building.SetGeneratorLocation(2, 'M');
-            building.SetGeneratorLocation(3, 'Q');
+            var buildingAt0 = new Building(new[] { 'L', 'H', 'M', 'Q' });
+            buildingAt0.SetGeneratorLocation(0, 'L');
+            buildingAt0.SetGeneratorLocation(2, 'H');
+            buildingAt0.SetGeneratorLocation(2, 'M');
+            buildingAt0.SetGeneratorLocation(3, 'Q');
+            Assert.AreEqual(new[] { 'L' }, buildingAt0.GetGeneratorsOnCurrentFloor());
 
-            building.ElevatorLocation = 0;
-            Assert.AreEqual(new[] { 'L' }, building.GetGeneratorsOnCurrentFloor());
+            var buildingAt2 = new Building(new[] { 'L', 'H', 'M', 'Q' }, 2);
+            buildingAt2.SetGeneratorLocation(0, 'L');
+            buildingAt2.SetGeneratorLocation(2, 'H');
+            buildingAt2.SetGeneratorLocation(2, 'M');
+            buildingAt2.SetGeneratorLocation(3, 'Q');
+            Assert.AreEqual(new[] { 'H', 'M' }, buildingAt2.GetGeneratorsOnCurrentFloor());
 
-            building.ElevatorLocation = 2;
-            Assert.AreEqual(new[] { 'H', 'M' }, building.GetGeneratorsOnCurrentFloor());
-
-            building.ElevatorLocation = 3;
-            Assert.AreEqual(new[] { 'Q' }, building.GetGeneratorsOnCurrentFloor());
+            var buildingAt3 = new Building(new[] { 'L', 'H', 'M', 'Q' }, 3);
+            buildingAt3.SetGeneratorLocation(0, 'L');
+            buildingAt3.SetGeneratorLocation(2, 'H');
+            buildingAt3.SetGeneratorLocation(2, 'M');
+            buildingAt3.SetGeneratorLocation(3, 'Q');
+            Assert.AreEqual(new[] { 'Q' }, buildingAt3.GetGeneratorsOnCurrentFloor());
         }
 
         [Test]

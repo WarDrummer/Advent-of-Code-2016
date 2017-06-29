@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Tools;
 
 namespace day11
@@ -70,11 +71,32 @@ namespace day11
             startState.SetMicrochipLocation(0, 'L');
             //*/
 
-            var bfs = new BreadthFirstSearch<long>(Building.CreateGoalState(symbols));
-            var fewestMoves = bfs.GetMinimumNumberOfMoves(startState);
+            var fewestMoves = 0;
+            LogTime(() =>
+            {
+                var bfs = new BreadthFirstSearch<long>(Building.CreateGoalState(symbols));
+                fewestMoves = bfs.GetMinimumNumberOfMoves(startState);
+            });
            
             Console.WriteLine(fewestMoves);
             Console.ReadKey();
         }
+
+        private delegate void TimedAction();
+        private static void LogTime(TimedAction action, int numberOfTimes = 1)
+        {
+            var sw = new Stopwatch();
+            try
+            {
+                sw.Start();
+                for(var i = 0; i < numberOfTimes; i++)
+                    action();
+            }
+            finally
+            {
+                Console.WriteLine(sw.Elapsed.ToString());
+            }
+        }
     }
+
 }
