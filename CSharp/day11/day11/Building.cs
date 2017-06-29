@@ -43,8 +43,8 @@ namespace day11
         {
             _symbols = new List<char>(symbols);
             _symbolCount = _symbols.Count;
-            _generatorOffset = _symbolCount * 2;
-            _elevatorOffset = _symbolCount * 4;
+            _generatorOffset = _symbolCount << 1;
+            _elevatorOffset = _symbolCount << 2;
             _microchipLocations = microchipLocations;
             _generatorLocations = generatorLocations;
             _elevatorLocation = elevatorLocation;
@@ -279,11 +279,11 @@ namespace day11
 
                 for (int i = 0, j = 0, k = _generatorOffset; i < _symbolCount; i++, j+=2, k+=2)
                 {
-                    hash += _microchipLocations[i] << j;
-                    hash += _generatorLocations[i] << k;
+                    hash |= _microchipLocations[i] << j;
+                    hash |= _generatorLocations[i] << k;
                 }
 
-                hash += _elevatorLocation << _elevatorOffset;
+                hash |= _elevatorLocation << _elevatorOffset;
                 return hash;
             }
         }
